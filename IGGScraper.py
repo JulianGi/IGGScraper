@@ -1,6 +1,5 @@
 from selenium import webdriver
-import time
-import re
+from time import sleep
 from os import system
 
 sources = ["0", "Mega.co.nz", "Openload.co","KumpulBagi", "UpFile","FileCDN","Go4Up (Multi Links)","Uploaded","Uptobox","Google Drive"]
@@ -33,9 +32,9 @@ for element in paragraphs:
         
         driver.get(Openlinks[0])
         print("Grabbing required cookies...")
-        time.sleep(4)
+        sleep(4)
         print("Done")
-        time.sleep(1)
+        sleep(1)
 
         system("cls")
 
