@@ -1,6 +1,7 @@
 from selenium import webdriver
 from time import sleep
 from os import system
+import re
 
 sources = ["0", "Mega.co.nz", "Openload.co","KumpulBagi", "UpFile","FileCDN","Go4Up (Multi Links)","Uploaded","Uptobox","Google Drive"] #Download Sources
 Openlinks = [] #Links to IGGs on site link generator 
@@ -55,6 +56,7 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
                 string = string[string.find("xurl=s:") + 8 :]#only display the final part of a string depending on whether it contains xurl=s: or xurl=: 
             else:
                 string = string[string.find("xurl=:") + 7 :]
+            string = re.sub('%23', '#', string)#change %23 in megalinks to #
             print("http://" + string)#add http::// to the beginning of each string so downloadmanagers recognize the string as a link
 
         print("----------------------------------------------------------------------")           
