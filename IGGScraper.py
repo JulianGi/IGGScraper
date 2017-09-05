@@ -26,7 +26,7 @@ def GotCookie(cookie):#if cookie exists return true
     for cookies in driver.get_cookies():
         if cookies["name"] == cookie:
             return True
-        return False
+    return False
 
 print("Loading Webdriver...")
 driver=webdriver.PhantomJS("C:\\SeleniumDrivers\\phantomjs.exe") #loading phantomjs
