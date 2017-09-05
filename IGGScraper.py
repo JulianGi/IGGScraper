@@ -41,7 +41,7 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
         
         driver.get(Openlinks[0])  #open first link to get the cf_clearance cookie that is needed to get the correct html source
         print("Grabbing required cookies...")
-        while not GotCookie("cf_clearance"):
+        while not GotCookie("__cfduid"):
             sleep(0.1)
 
         
