@@ -29,7 +29,12 @@ def GotCookie(cookie):#if cookie exists return true
     return False
 
 print("Loading Webdriver...")
-driver=webdriver.PhantomJS("C:\\SeleniumDrivers\\phantomjs.exe") #loading phantomjs
+
+options = webdriver.ChromeOptions()
+options.add_argument("headless")#setting browser to start headless(without GUI)
+
+driver=webdriver.Chrome("C:\\SeleniumDrivers\\chromedriver.exe", chrome_options=options) #loading chrome
+
 print("Loading Website...")
 driver.get(game)    #opening website
 
@@ -56,7 +61,14 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
             else:
                 string = string[string.find("xurl=:") + 7 :]
             string = re.sub('%23', '#', string)#change %23 in megalinks to #
-            print("http://" + string)#add http::// to the beginning of each string so downloadmanagers recognize the string as a link
+            string = "http://" + string
+
+            if source == 2:#get direct download links for openload 
+                driver.get(string)
+                string = driver.execute_script("""if($('#streamurl').html().length){
+    return 'https://openload.co/stream/'+$('#streamurl').html();
+}""")
+            print(string)#add http::// to the beginning of each string so downloadmanagers recognize the string as a link
 
         print("----------------------------------------------------------------------")           
         break;    #stop the loop since we got the links that we wanted
