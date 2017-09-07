@@ -65,7 +65,7 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
 
             if source == 2:#get direct download links for openload 
                 driver.get(string)
-                string = driver.execute_script("""
+                string = driver.execute_script("""if($('#streamurl').html().length){ 
     return 'https://openload.co/stream/'+$('#streamurl').html();
 }""")
             print(string)#add http::// to the beginning of each string so downloadmanagers recognize the string as a link
@@ -75,3 +75,5 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
         
         
 driver.quit() #quit driver
+
+
