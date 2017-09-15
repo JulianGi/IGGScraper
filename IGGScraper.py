@@ -9,11 +9,16 @@ FinalList = [] #Links to the final file downloads
 
 
 
-game = input("Link to game: ")#get game to scrape links for
-if "://igg-games.com" not in game:
-    print("Please enter a valid http://igg-games.com or  https://igg-games.com link!") #input validation
-    exit()
-
+ori_game = input("Link to game: ")#get game to scrape links for
+if "://igg-games.com" not in ori_game:
+    if "igg-games.com" in ori_game:
+        game = "http://" + ori_game
+        
+    else:
+        print("Please enter a valid http://igg-games.com or  https://igg-games.com link!") #input validation
+        exit()
+else:
+    game = ori_game
 
 for i in range(1, len(sources)):#display sources to choose from
     print(str(i) + ") " + sources[i])
@@ -80,5 +85,4 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
         
         
 driver.quit() #quit driver
-
 
