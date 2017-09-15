@@ -49,9 +49,11 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
         while not GotCookie("__cfduid"):
             sleep(0.1)
 
-        
+        if source == 2:
+            print("Get direct links?(Slower and might lead to errors)")
+            directlinks = input("y/n: ")
         system("cls")#clear screen
-
+    
         print("----------------------------------------------------------------------")
         for x in Openlinks:#loop through the list we created earlier
             driver.get(x) #open websites
@@ -63,11 +65,14 @@ for element in driver.find_elements_by_tag_name("p"):#hrefs to all parts of one 
             string = re.sub('%23', '#', string)#change %23 in megalinks to #
             string = "http://" + string
 
-            if source == 2:#get direct download links for openload 
-                driver.get(string)
-                string = driver.execute_script("""if($('#streamurl').html().length){ 
-    return 'https://openload.co/stream/'+$('#streamurl').html();
-}""")
+            
+            if source == 2:#get direct download links for openload
+                if directlinks == "y":
+                    driver.get(string)
+                    string = driver.execute_script("""if($('#streamurl').html().length){ 
+        return 'https://openload.co/stream/'+$('#streamurl').html();
+    }""")
+
             print(string)#add http::// to the beginning of each string so downloadmanagers recognize the string as a link
 
         print("----------------------------------------------------------------------")           
