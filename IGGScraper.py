@@ -1,6 +1,11 @@
-from bs4 import BeautifulSoup
-import urllib.request
-import re
+try:
+    from bs4 import BeautifulSoup
+    import urllib.request
+    import re
+except ImportError:
+    print("Some modules are not installed. Run \n python -m pip install -r requirements.txt")
+
+
 
 
 urlChoice = input("IGG-Games Link:")
