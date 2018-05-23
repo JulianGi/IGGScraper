@@ -4,7 +4,7 @@ try:
     import re
 except ImportError:
     print("Some modules are not installed. Run \n python -m pip install -r requirements.txt")
-
+    exit()
 
 
 
