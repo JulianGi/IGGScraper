@@ -1,26 +1,41 @@
-def main(): 
+
+#credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
+def _bluemediafiles_decodeKey(encoded):
+    key = ''
+    i = int(len(encoded) / 2 - 5)
+    while i >= 0:
+        key += encoded[i]
+        i = i - 2
+    i = int(len(encoded) / 2 + 4)
+    while(i < len(encoded)):
+        key += encoded[i]
+        i = i + 2
+    return key
+
+
+def main():
     try:
         from bs4 import BeautifulSoup
         import urllib.request
         import re
+        import pyperclip
     except ImportError:
         print("Some modules are not installed. Run \n python -m pip install -r requirements.txt")
         exit()
-
-
 
     url_choice = input("IGG-Games Link: ")
     if not (url_choice.startswith("http://") or url_choice.startswith("https://")):
         url_choice = "http://" + url_choice
     req = urllib.request.Request(
-        url_choice, 
-        data=None, 
+        url_choice,
+        data=None,
         headers={
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
         }
     )
 
-    possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Openload.co", "KumpulBagi", "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox", "Google Drive"]  #Download Sources
+    possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Mega.nz", "Openload.co", "KumpulBagi",
+                        "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox", "Google Drive"]  # Download Sources
     existing_sources = []
 
     try:
@@ -40,7 +55,7 @@ def main():
         print("No Link sources found.")
         exit()
     for counter, value in enumerate(existing_sources):
-        print(str(counter + 1) + ") " + value) 
+        print(str(counter + 1) + ") " + value)
     source_choice = input("Choose download source: ")
     while not isinstance(source_choice, int):
         try:
@@ -48,18 +63,52 @@ def main():
             if source_choice > len(existing_sources):
                 raise ValueError
         except ValueError:
-            source_choice = input("Please enter a number between 1 and "+str(len(existing_sources))+ ": ")
-        
+            source_choice = input(
+                "Please enter a number between 1 and "+str(len(existing_sources)) + ": ")
 
-
+    finalOutput = ""
     for paragraph in soup.find_all("p"):
         if existing_sources[source_choice - 1] in paragraph.text:
             print("\n")
             for hyperlink in paragraph("a"):
                 string = hyperlink.get('href')
-                string = re.sub('%23', '#', string)
-                print("http"+string[string.rfind("://"):])
-            print()
-            break
+                sec_req = urllib.request.Request(
+                    string,
+                    data=None,
+                    headers={
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                    }
+                )
+                try:
+                    request = urllib.request.urlopen(sec_req)
+                except urllib.error.URLError:
+                    print("Url could not be opend.")
+                    exit()
+
+                soup = BeautifulSoup(request, "lxml")
+
+                for script in soup.find_all("script"):
+                    matches = re.findall(
+                        r"Goroi_n_Create_Button\(\"(.*?)\"\)", script.text)
+                    if(len(matches) > 0):
+                        string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
+                        third_req = urllib.request.Request(
+                            string,
+                            data=None,
+                            headers={
+                                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                            }
+                        )
+                        try:
+                            request = urllib.request.urlopen(third_req)
+                        except urllib.error.URLError:
+                            print("Url could not be opend.")
+                            exit()
+                        print(request.geturl())
+
+            print("\n")
+            if (input("Copy to Clipboard? y/n ").lower() == "y"):
+                pyperclip.copy(finalOutput)
+
 
 main()
