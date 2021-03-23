@@ -105,6 +105,7 @@ def main():
                             print("Url could not be opend.")
                             exit()
                         print(request.geturl())
+                        finalOutput += request.geturl() + "\n"
 
             print("\n")
             if (input("Copy to Clipboard? y/n ").lower() == "y"):
