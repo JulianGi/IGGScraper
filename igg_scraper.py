@@ -1,5 +1,4 @@
-
-#credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
+# credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
 def _bluemediafiles_decodeKey(encoded):
     key = ''
     i = int(len(encoded) / 2 - 5)
@@ -7,7 +6,7 @@ def _bluemediafiles_decodeKey(encoded):
         key += encoded[i]
         i = i - 2
     i = int(len(encoded) / 2 + 4)
-    while(i < len(encoded)):
+    while i < len(encoded):
         key += encoded[i]
         i = i + 2
     return key
@@ -35,18 +34,19 @@ def main():
     )
 
     possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Mega.nz", "Openload.co", "KumpulBagi",
-                        "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox", "Google Drive"]  # Download Sources
+                        "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox",
+                        "Google Drive", "1Fichier", "Direct", "ClicknUpload", "AnonFiles"]  # Download Sources
     existing_sources = []
 
     try:
         request = urllib.request.urlopen(req)
     except urllib.error.URLError:
-        print("Url could not be opend.")
+        print("URL could not be opened.")
         exit()
 
     soup = BeautifulSoup(request, "lxml")
 
-    for paragraph in soup.find_all("p"):
+    for paragraph in soup.find_all("b"):
         for source in possible_sources:
             if "Link " + source in paragraph.text:
                 existing_sources.append(source)
@@ -64,7 +64,7 @@ def main():
                 raise ValueError
         except ValueError:
             source_choice = input(
-                "Please enter a number between 1 and "+str(len(existing_sources)) + ": ")
+                "Please enter a number between 1 and " + str(len(existing_sources)) + ": ")
 
     finalOutput = ""
     for paragraph in soup.find_all("p"):
@@ -82,7 +82,7 @@ def main():
                 try:
                     request = urllib.request.urlopen(sec_req)
                 except urllib.error.URLError:
-                    print("Url could not be opend.")
+                    print("URL could not be opened.")
                     exit()
 
                 soup = BeautifulSoup(request, "lxml")
@@ -90,7 +90,7 @@ def main():
                 for script in soup.find_all("script"):
                     matches = re.findall(
                         r"Goroi_n_Create_Button\(\"(.*?)\"\)", str(script))
-                    if(len(matches) > 0):
+                    if len(matches) > 0:
                         string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
                         third_req = urllib.request.Request(
                             string,
@@ -102,14 +102,14 @@ def main():
                         try:
                             request = urllib.request.urlopen(third_req)
                         except urllib.error.URLError:
-                            print("Url could not be opend.")
+                            print("URL could not be opened.")
                             exit()
                         print(request.geturl())
                         finalOutput += request.geturl() + "\n"
 
             print("\n")
-            if (input("Copy to Clipboard? y/n ").lower() == "y"):
+            if input("Copy to Clipboard? y/n ").lower() == "y":
                 pyperclip.copy(finalOutput)
 
-
+                
 main()
