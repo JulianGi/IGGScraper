@@ -89,7 +89,7 @@ def main():
 
                 for script in soup.find_all("script"):
                     matches = re.findall(
-                        r"Goroi_n_Create_Button\(\"(.*?)\"\)", script.text)
+                        r"Goroi_n_Create_Button\(\"(.*?)\"\)", str(script))
                     if(len(matches) > 0):
                         string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
                         third_req = urllib.request.Request(
