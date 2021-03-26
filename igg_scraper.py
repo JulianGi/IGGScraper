@@ -33,7 +33,7 @@ def main():
         }
     )
 
-    possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Mega.nz", "Openload.co", "KumpulBagi",
+    possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Mega.nz", "TusFiles", "KumpulBagi",
                         "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox",
                         "Google Drive", "1Fichier", "Direct", "ClicknUpload", "AnonFiles"]  # Download Sources
     existing_sources = []
