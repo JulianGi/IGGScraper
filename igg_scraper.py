@@ -1,5 +1,5 @@
-
-#credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
+# credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
+# Decryption process of the Goroi_n_Create_Button token
 def _bluemediafiles_decodeKey(encoded):
     key = ''
     i = int(len(encoded) / 2 - 5)
@@ -7,7 +7,7 @@ def _bluemediafiles_decodeKey(encoded):
         key += encoded[i]
         i = i - 2
     i = int(len(encoded) / 2 + 4)
-    while(i < len(encoded)):
+    while i < len(encoded):
         key += encoded[i]
         i = i + 2
     return key
@@ -34,81 +34,102 @@ def main():
         }
     )
 
-    possible_sources = ["MegaUp.net", "Rapidgator", "Mega.co.nz", "Mega.nz", "Openload.co", "KumpulBagi",
-                        "UpFile", "FileCDN", "Go4Up (Multi Links)", "Uploaded", "Uptobox", "Google Drive"]  # Download Sources
-    existing_sources = []
-
     try:
         request = urllib.request.urlopen(req)
     except urllib.error.URLError:
-        print("Url could not be opend.")
+        print("URL could not be opened.")
         exit()
 
     soup = BeautifulSoup(request, "lxml")
+    source_list = []
 
-    for paragraph in soup.find_all("p"):
-        for source in possible_sources:
-            if "Link " + source in paragraph.text:
-                existing_sources.append(source)
+    # Iterate through all sources
+    for source in soup.find_all("b"):
+        source_list += re.findall(r"Link [0-9]*[a-zA-Z]+\.* *[0-9]*[a-zA-Z]+\.*[a-zA-Z]*", str(source))
+        # Remove torrent link if available
+        if str(source).__contains__("TORRENT"):
+            source_list.pop(0)
 
-    if not existing_sources:
+    # Remove 'Link' text from source_list
+    for count in range(len(source_list)):
+        item = source_list[count]
+        source_list[count] = item[5:]
+
+    if not source_list:
         print("No Link sources found.")
         exit()
-    for counter, value in enumerate(existing_sources):
+    for counter, value in enumerate(source_list):
         print(str(counter + 1) + ") " + value)
     source_choice = input("Choose download source: ")
     while not isinstance(source_choice, int):
         try:
             source_choice = int(source_choice)
-            if source_choice > len(existing_sources):
+            if source_choice > len(source_list):
                 raise ValueError
         except ValueError:
             source_choice = input(
-                "Please enter a number between 1 and "+str(len(existing_sources)) + ": ")
+                "Please enter a number between 1 and " + str(len(source_list)) + ": ")
 
     finalOutput = ""
     for paragraph in soup.find_all("p"):
-        if existing_sources[source_choice - 1] in paragraph.text:
+        if source_list[source_choice - 1] in paragraph.text:
             print("\n")
             for hyperlink in paragraph("a"):
                 string = hyperlink.get('href')
-                sec_req = urllib.request.Request(
-                    string,
-                    data=None,
-                    headers={
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-                    }
-                )
-                try:
-                    request = urllib.request.urlopen(sec_req)
-                except urllib.error.URLError:
-                    print("Url could not be opend.")
-                    exit()
+                # Check if button is already redirecting to direct link
+                if "http://bluemediafiles.com" not in string:
+                    sec_req = urllib.request.Request(
+                        string,
+                        data=None,
+                        headers={
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                        }
+                    )
+                    try:
+                        request = urllib.request.urlopen(sec_req)
+                    except urllib.error.URLError:
+                        print("URL could not be opened.")
+                        exit()
+                    print(request.geturl())
+                    finalOutput += request.geturl() + "\n"
+                else:
+                    sec_req = urllib.request.Request(
+                        string,
+                        data=None,
+                        headers={
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                        }
+                    )
+                    try:
+                        request = urllib.request.urlopen(sec_req)
+                    except urllib.error.URLError:
+                        print("URL could not be opened.")
+                        exit()
 
-                soup = BeautifulSoup(request, "lxml")
+                    soup = BeautifulSoup(request, "lxml")
 
-                for script in soup.find_all("script"):
-                    matches = re.findall(
-                        r"Goroi_n_Create_Button\(\"(.*?)\"\)", script.text)
-                    if(len(matches) > 0):
-                        string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
-                        third_req = urllib.request.Request(
-                            string,
-                            data=None,
-                            headers={
-                                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-                            }
-                        )
-                        try:
-                            request = urllib.request.urlopen(third_req)
-                        except urllib.error.URLError:
-                            print("Url could not be opend.")
-                            exit()
-                        print(request.geturl())
-                        finalOutput += request.geturl() + "\n"
+                    for script in soup.find_all("script"):
+                        matches = re.findall(
+                            r"Goroi_n_Create_Button\(\"(.*?)\"\)", str(script))
+                        if len(matches) > 0:
+                            string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
+                            third_req = urllib.request.Request(
+                                string,
+                                data=None,
+                                headers={
+                                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                                }
+                            )
+                            try:
+                                request = urllib.request.urlopen(third_req)
+                            except urllib.error.URLError:
+                                print("URL could not be opened.")
+                                exit()
+                            print(request.geturl())
+                            finalOutput += request.geturl() + "\n"
 
             print("\n")
-            if (input("Copy to Clipboard? y/n ").lower() == "y"):
+            if input("Copy to Clipboard? y/n ").lower() == "y":
                 pyperclip.copy(finalOutput)
 
 
