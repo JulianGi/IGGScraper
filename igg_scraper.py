@@ -125,7 +125,10 @@ def main():
                             except urllib.error.URLError:
                                 print("URL could not be opened.")
                                 exit()
-                            print(request.geturl())
+                            result_url = request.geturl()
+                            if("mega.nz" in result_url):
+                                result_url = result_url.replace("%23", "#")
+                            print(result_url)
                             finalOutput += request.geturl() + "\n"
 
             print("\n")
