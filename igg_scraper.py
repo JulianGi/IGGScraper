@@ -1,3 +1,12 @@
+try:
+        from bs4 import BeautifulSoup
+        import urllib.request
+        import re
+        import pyperclip
+except ImportError:
+        print("Some modules are not installed. Run \n python -m pip install -r requirements.txt")
+        exit()
+
 # credit tingtingths https://greasyfork.org/en/scripts/423435-igg-games-bluemediafiles-bypass/code
 # Decryption process of the Goroi_n_Create_Button token
 def _bluemediafiles_decodeKey(encoded):
@@ -13,15 +22,46 @@ def _bluemediafiles_decodeKey(encoded):
     return key
 
 
-def main():
+def url_generator_link_decode(link):
+    sec_req = urllib.request.Request(
+        link,
+        data=None,
+        headers={
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                        }
+        )
     try:
-        from bs4 import BeautifulSoup
-        import urllib.request
-        import re
-        import pyperclip
-    except ImportError:
-        print("Some modules are not installed. Run \n python -m pip install -r requirements.txt")
-        exit()
+        request = urllib.request.urlopen(sec_req)
+
+    except urllib.error.URLError:
+        return "URL could not be opened."
+
+    soup = BeautifulSoup(request, "lxml")
+
+    for script in soup.find_all("script"):
+        matches = re.findall(r"Goroi_n_Create_Button\(\"(.*?)\"\)", str(script))
+        if len(matches) > 0:
+            string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
+            third_req = urllib.request.Request(
+                                string,
+                                data=None,
+                                headers={
+                                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                                }
+                            )
+            try:
+                request = urllib.request.urlopen(third_req)
+            except urllib.error.URLError:
+                print("URL could not be opened.")
+                continue
+            result_url = request.geturl()
+            if("mega.nz" in result_url):
+                result_url = result_url.replace("%23", "#")
+            return result_url    
+
+
+
+def main():
 
     url_choice = input("IGG-Games Link: ")
     if not (url_choice.startswith("http://") or url_choice.startswith("https://")):
@@ -45,7 +85,8 @@ def main():
 
     # Iterate through all sources
     for source in soup.find_all("b"):
-        source_list += re.findall(r"Link [0-9]*[a-zA-Z]+\.* *[0-9]*[a-zA-Z]+\.*[a-zA-Z]*", str(source))
+        source_list += re.findall(
+            r"Link [0-9]*[a-zA-Z]+\.* *[0-9]*[a-zA-Z]+\.*[a-zA-Z]*", str(source))
         # Remove torrent link if available
         if str(source).__contains__("TORRENT"):
             source_list.pop(0)
@@ -71,7 +112,21 @@ def main():
                 "Please enter a number between 1 and " + str(len(source_list)) + ": ")
 
     finalOutput = ""
+    isUpdate = False
+
     for paragraph in soup.find_all("p"):
+        if(isUpdate):
+            for hyperlink in paragraph("a"):
+                link = hyperlink.get("href")
+                if("url-generator" in link):
+                    link = url_generator_link_decode(link)
+                print(link)
+            isUpdate = False
+        for span in paragraph("span"):
+            if("UPDATE" in span.text):
+                print(span.text)
+                isUpdate = True
+
         if source_list[source_choice - 1] in paragraph.text:
             print("\n")
             for hyperlink in paragraph("a"):
@@ -89,7 +144,7 @@ def main():
                         request = urllib.request.urlopen(sec_req)
                     except urllib.error.URLError:
                         print("URL could not be opened.")
-                        exit()
+                        continue;
                     print(request.geturl())
                     finalOutput += request.geturl() + "\n"
                 else:
@@ -104,7 +159,7 @@ def main():
                         request = urllib.request.urlopen(sec_req)
                     except urllib.error.URLError:
                         print("URL could not be opened.")
-                        exit()
+                        continue;
 
                     soup = BeautifulSoup(request, "lxml")
 
@@ -112,7 +167,8 @@ def main():
                         matches = re.findall(
                             r"Goroi_n_Create_Button\(\"(.*?)\"\)", str(script))
                         if len(matches) > 0:
-                            string = 'https://bluemediafiles.com/get-url.php?url=' + _bluemediafiles_decodeKey(matches[0])
+                            string = 'https://bluemediafiles.com/get-url.php?url=' + \
+                                _bluemediafiles_decodeKey(matches[0])
                             third_req = urllib.request.Request(
                                 string,
                                 data=None,
@@ -124,7 +180,7 @@ def main():
                                 request = urllib.request.urlopen(third_req)
                             except urllib.error.URLError:
                                 print("URL could not be opened.")
-                                exit()
+                                continue
                             result_url = request.geturl()
                             if("mega.nz" in result_url):
                                 result_url = result_url.replace("%23", "#")
